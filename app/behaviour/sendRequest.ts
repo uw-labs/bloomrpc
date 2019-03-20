@@ -4,6 +4,7 @@ import { ProtoInfo } from './protoInfo';
 import * as grpc from 'grpc';
 import * as fs from "fs";
 import { Certificate } from "./importCertificates";
+import { parse as parseError } from './grpcErrorParser';
 
 export interface GRPCRequestInfo {
   url: string;
@@ -80,9 +81,9 @@ export class GRPCRequest extends EventEmitter {
         this.emit(GRPCEventType.DATA, data, true);
       });
 
-      call.on('error', (err: { [key: string]: any }) => {
+      call.on('error', (err: ServiceError) => {
         if (err && err.code !== 1) {
-          this.emit(GRPCEventType.ERROR, err);
+          this.emitError(err);
 
           if (err.code === 2 || err.code === 14) { // Stream Removed.
             this.emit(GRPCEventType.END, call);
@@ -184,7 +185,7 @@ export class GRPCRequest extends EventEmitter {
       if (err.code === 1) {
         return;
       } else {
-        this.emit(GRPCEventType.ERROR, err);
+        this.emitError(err);
       }
     } else {
       this.emit(GRPCEventType.DATA, response);
@@ -217,5 +218,14 @@ export class GRPCRequest extends EventEmitter {
     }
 
     return { inputs, metadata };
+  }
+
+  private emitError(serviceError: ServiceError) {
+    parseError(serviceError).then((errorObject) => {
+      this.emit(GRPCEventType.ERROR, errorObject)
+    }).catch((e) => {
+      console.warn(e);
+      this.emit(GRPCEventType.ERROR, { message: serviceError.message, code: serviceError.code });
+    });
   }
 }

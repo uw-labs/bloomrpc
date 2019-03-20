@@ -9,7 +9,7 @@ import {
   addResponseStreamData, setStreamCommitted
 } from './actions';
 import { ControlsStateProps } from './Controls';
-import { GRPCEventType, GRPCRequest } from '../../behaviour';
+import { GRPCEventType, GRPCRequest, ResponseError } from '../../behaviour';
 
 export function PlayButton({ dispatch, state, protoInfo }: ControlsStateProps) {
   return (
@@ -53,10 +53,8 @@ export function PlayButton({ dispatch, state, protoInfo }: ControlsStateProps) {
 
         dispatch(setResponseStreamData([]));
 
-        grpcRequest.on(GRPCEventType.ERROR, (e: Error) => {
-          dispatch(setOutput(JSON.stringify({
-            error: e.message,
-          }, null, 2)));
+        grpcRequest.on(GRPCEventType.ERROR, (responseError: ResponseError) => {
+          dispatch(setOutput(JSON.stringify(responseError, null, 2)));
         });
 
         grpcRequest.on(GRPCEventType.DATA, (data: object, stream?: boolean) => {

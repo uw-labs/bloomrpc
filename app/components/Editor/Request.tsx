@@ -3,9 +3,11 @@ import AceEditor, { Command } from 'react-ace';
 import * as Mousetrap from 'mousetrap'
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 import { Tabs } from 'antd';
+import styled from 'styled-components'
 import { Viewer } from './Viewer';
 
 interface RequestProps {
+  theme: string
   data: string
   streamData: string[]
   onChangeData: (value: string) => void
@@ -13,7 +15,13 @@ interface RequestProps {
   active?: boolean
 }
 
-export function Request({onChangeData, commands, data, streamData, active}: RequestProps) {
+const StyledAceEditor = styled(AceEditor)`
+  background: ${props => props.theme.backgroundLight} !important;
+`
+
+const StyledTabPane = styled(Tabs.TabPane)``
+
+export function Request({onChangeData, commands, data, streamData, theme, active}: RequestProps) {
   const editorTabKey = `editorTab`;
 
   // bind esc for focus on the active editor window
@@ -35,16 +43,17 @@ export function Request({onChangeData, commands, data, streamData, active}: Requ
         defaultActiveKey={editorTabKey}
         tabPosition={"top"}
         style={{width: "100%"}}
+
       >
-        <Tabs.TabPane tab="Editor" key={editorTabKey}>
-          <AceEditor
+        <StyledTabPane tab="Editor" key={editorTabKey}>
+          <StyledAceEditor
             ref={aceEditor}
-            style={{ background: "#fff" }}
             width={"100%"}
+            className={"request-editor"}
             height={"calc(100vh - 185px)"}
             mode="json"
-            theme="textmate"
             name="inputs"
+            theme={theme === 'white' ? "textmate" : "monokai"}
             fontSize={13}
             cursorStart={2}
             onChange={onChangeData}
@@ -59,12 +68,12 @@ export function Request({onChangeData, commands, data, streamData, active}: Requ
             }}
             tabSize={2}
           />
-        </Tabs.TabPane>
+        </StyledTabPane>
 
         {streamData.map((data, key) => (
-          <Tabs.TabPane tab={`Stream ${key + 1}`} key={`${key}`}>
-            <Viewer output={data} />
-          </Tabs.TabPane>
+          <StyledTabPane tab={`Stream ${key + 1}`} key={`${key}`}>
+            <Viewer theme={theme} output={data} />
+          </StyledTabPane>
         ))}
       </Tabs>
     </>

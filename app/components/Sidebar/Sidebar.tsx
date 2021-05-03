@@ -1,21 +1,107 @@
 import * as React from 'react';
 import { useEffect, useState } from "react";
-import { Button, Icon, Modal, Tooltip, Tree, Input } from 'antd';
+import { Button, Icon, Modal, Tooltip, Tree, Switch } from 'antd';
 import { Badge } from '../Badge/Badge';
 import { OnProtoUpload, ProtoFile, ProtoService, importProtos } from '../../behaviour';
 import { PathResolution } from "./PathResolution";
 import { getImportPaths } from "../../storage";
+import styled from 'styled-components'
+
 
 interface SidebarProps {
   protos: ProtoFile[]
   onMethodSelected: (methodName: string, protoService: ProtoService) => void
+  onMethodDoubleClick: (methodName: string, protoService: ProtoService) => void
   onProtoUpload: OnProtoUpload
   onDeleteAll: () => void
   onReload: () => void
-  onMethodDoubleClick: (methodName: string, protoService: ProtoService) => void
+  changeTheme: () => void
+  theme: string
 }
 
-export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, onReload, onMethodDoubleClick }: SidebarProps) {
+const StyledTooltipIcon = styled(Icon)`
+  font-size: 22px;
+  margin-right: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: ${props => props.theme.background};
+  color: ${props => {
+    return props.theme.primary
+  }};
+`
+
+const TitleBox = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  padding-bottom: 4px;
+  padding-left: 10px;
+
+  border-bottom: 1px solid ${props => props.theme.border.bottom};
+`
+
+const Title = styled.h3`
+  color: ${props=> props.theme.h3.color}
+`
+const OptionsContainer = styled.div`
+  padding: 3px 6px;
+  display: flex;
+  align-content: space-between;
+  border-bottom: 1px solid ${props => props.theme.border.bottom};
+`
+
+const OptionsLeft = styled.div`
+  width: 50%;
+`
+
+const OptionsRight = styled.div`
+  width: 50%;
+  text-align: right;
+  justify-content: flex-end;
+  align-items: center;
+  display: flex;
+`
+
+const GhostButton = styled(Button)`
+  height: 22;
+  padding-right: 5px;
+  padding-left: 5px;
+  border: none;
+  color: ${props=>props.theme.primary};
+`
+
+const IconBtn = styled(Icon)`
+  cursor: pointer;
+  color: ${props=>props.theme.icon.color};
+`
+
+
+const IconBtnRed = styled(IconBtn)`
+  color: ${props=>props.theme.icon.warning};
+`
+
+const Protos = styled.div`
+  overflow: auto;
+  maxHeight: calc(100vh - 85px);
+  height: 100%;
+`
+
+const ThemeSwitch = styled(Switch)`
+  margin-right: 10px;
+  color: ${props=>props.theme.switch.color};
+  background: ${props=>props.theme.switch.background};
+  transition: none;
+`
+
+const StyledTreeNode = styled(Tree.TreeNode)``
+
+const ThemeTooltipContainer = styled.div`
+  display: flex;
+  align-items: center;
+`
+
+export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, onReload, changeTheme, theme, onMethodDoubleClick }: SidebarProps) {
 
   const [importPaths, setImportPaths] = useState<string[]>([""]);
   const [importPathVisible, setImportPathsVisible] = useState(false);
@@ -64,41 +150,37 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
 
   return (
     <>
-      <div style={styles.sidebarTitleContainer}>
-        <h3 style={styles.sidebarTitle}>Protos</h3>
-
-        <Tooltip placement="bottom" title="Import protos">
-          <Icon
-            onClick={() => {
-              importProtos(onProtoUpload, importPaths)
-            }}
-            type="plus-circle"
-            theme="filled"
-            style={styles.icon}
+      <TitleBox>
+        <Title>Protos</Title>
+        <ThemeTooltipContainer>
+          <ThemeSwitch 
+            checkedChildren={<Icon type="check" />}
+            unCheckedChildren={<Icon type="close" />}
+            onClick={changeTheme}
           />
-        </Tooltip>
-      </div>
+          <Tooltip placement="bottom" title="Import protos">
+            <StyledTooltipIcon
+              onClick={() => {
+                importProtos(onProtoUpload, importPaths)
+              }}
+              type="plus-circle"
+            />
+          </Tooltip>
+        </ThemeTooltipContainer>
 
-      <div style={styles.optionsContainer}>
-        <div style={{width: "50%"}}>
+      </TitleBox>
+      <OptionsContainer>
+        <OptionsLeft>
           <Tooltip title="Reload" placement="bottomLeft" align={{offset: [-8, 0]}}>
-            <Button
-              type="ghost"
-              style={{height: 24, paddingRight: 5, paddingLeft: 5}}
-              onClick={onReload}
-            >
-              <Icon type="reload" style={{cursor: "pointer", color: "#1d93e6"}}/>
-            </Button>
+            <GhostButton type="ghost" onClick={onReload}>
+              <IconBtn type="reload"/>
+            </GhostButton>
           </Tooltip>
 
           <Tooltip title="Import Paths" placement="bottomLeft" align={{offset: [-8, 0]}}>
-            <Button
-                type="ghost"
-                style={{height: 24, paddingRight: 5, paddingLeft: 5, marginLeft: 5}}
-                onClick={() => setImportPathsVisible(true)}
-            >
-              <Icon type="file-search" style={{cursor: "pointer", color: "#1d93e6"}}/>
-            </Button>
+            <GhostButton type="ghost" onClick={() => setImportPathsVisible(true)}>
+              <IconBtn type="file-search"/>
+            </GhostButton>
           </Tooltip>
 
           <Tooltip title="Filter method names" placement="bottomLeft" align={{offset: [-8, 0]}}>
@@ -114,8 +196,7 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
           <Modal
               title={(
                   <div>
-                    <Icon type="file-search" />
-                    <span style={{marginLeft: 10}}> Import Paths </span>
+                    <Title> <IconBtn type="file-search" /> Import Paths </Title>
                   </div>
               )}
               visible={importPathVisible}
@@ -132,28 +213,17 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
                 importPaths={importPaths}
             />
           </Modal>
-        </div>
-        <div style={{width: "50%", textAlign: "right"}}>
+
+        </OptionsLeft>
+        <OptionsRight>
           <Tooltip title="Delete all" placement="bottomRight" align={{offset: [10, 0]}}>
-            <Button type="ghost" style={{height: 24, paddingRight: 5, paddingLeft: 5}} onClick={onDeleteAll}>
-              <Icon type="delete" style={{cursor: "pointer", color: "red" }} />
-            </Button>
+            <GhostButton type="ghost" onClick={onDeleteAll}>
+              <IconBtnRed type="delete" />
+            </GhostButton>
           </Tooltip>
-        </div>
-      </div>
-
-      <div style={{
-        overflow: "auto",
-        maxHeight: "calc(100vh - 85px)",
-        height: "100%"
-      }}>
-
-        <Input
-          placeholder={"Filter methods"}
-          hidden={!filterVisible}
-          onChange={(v) => setFilterMatch(v.target.value || null)}
-        />
-
+        </OptionsRight>
+      </OptionsContainer>
+      <Protos>
         {protos.length > 0 && <Tree.DirectoryTree
           showIcon
           defaultExpandAll
@@ -180,13 +250,13 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
           }}
         >
           {protos.map((proto) => (
-            <Tree.TreeNode
+            <StyledTreeNode
               icon={() => <Badge type="protoFile"> P </Badge>}
               title={proto.fileName}
               key={proto.fileName}
             >
               {Object.keys(proto.services).map((service) => (
-                <Tree.TreeNode
+                <StyledTreeNode
                   icon={<Badge type="service"> S </Badge>}
                   title={service}
                   key={`${proto.fileName}-${service}`}
@@ -205,44 +275,12 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
                       >
                     </Tree.TreeNode>
                   ))}
-                </Tree.TreeNode>
+                </StyledTreeNode>
               ))}
-            </Tree.TreeNode>
+            </StyledTreeNode>
           ))}
         </Tree.DirectoryTree>}
-      </div>
+      </Protos>
     </>
   );
 }
-
-const styles = {
-  sidebarTitleContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    paddingTop: 14,
-    paddingBottom: 4,
-    paddingLeft: 20,
-    borderBottom: "1px solid #eee",
-    background: "#001529"
-  },
-  sidebarTitle: {
-    color: "#fff",
-  },
-  icon: {
-    fontSize: 23,
-    marginBottom: 7,
-    marginRight: 12,
-    marginTop: -2,
-    color: "#28d440",
-    border: "2px solid #f3f6f9",
-    borderRadius: "50%",
-    cursor: "pointer"
-  },
-  optionsContainer: {
-    background: "#fafafa",
-    padding: "3px 6px",
-    display: "flex",
-    alignContent: "space-between",
-    borderBottom: "1px solid #e0e0e0",
-  }
-};

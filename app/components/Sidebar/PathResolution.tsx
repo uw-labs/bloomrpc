@@ -3,6 +3,8 @@ import { Icon, Input, Table, Tooltip } from "antd";
 import { useState } from "react";
 import { importResolvePath } from "../../behaviour";
 import { storeImportPaths } from "../../storage";
+import styled from 'styled-components'
+import { Theme } from '../../App'
 
 interface PathResolutionProps {
   onImportsChange?: (paths: string[]) => void
@@ -12,6 +14,25 @@ interface PathResolutionProps {
 interface TablePath {
   value: string
 }
+
+type Props = {
+  theme: Theme,
+  fontSize: number
+}
+
+const StyledIcon = styled(Icon)`
+  color: ${(props: Props)=>props.theme.icon.color};
+  font-size: ${(props: Props )=>props.fontSize}px;
+  cursor: pointer;
+  margin-top: 5px;
+`
+
+const StyledColumn = styled(Table.Column)`
+  color: ${(props)=>props.theme.primary};
+  background: ${(props)=>props.theme.background};
+`
+
+const StyledInput = styled(Input.Search)``
 
 export function PathResolution({ importPaths, onImportsChange }: PathResolutionProps) {
   const [pathValue, setPathStateValue] = useState("");
@@ -26,7 +47,7 @@ export function PathResolution({ importPaths, onImportsChange }: PathResolutionP
           pagination={false}
           rowKey={(path) => path.value || "addPath"}
       >
-        <Table.Column
+        <StyledColumn
           title="Path"
           width={"90%"}
           key={"pathColumn"}
@@ -34,7 +55,7 @@ export function PathResolution({ importPaths, onImportsChange }: PathResolutionP
             return (
                 <>
                 {!record.value ? (
-                    <Input.Search
+                    <StyledInput
                       value={pathValue}
                       placeholder={"Absolute path"}
                       enterButton={"..."}
@@ -62,23 +83,23 @@ export function PathResolution({ importPaths, onImportsChange }: PathResolutionP
           }}
         />
 
-        <Table.Column
+        <StyledColumn
             title=""
             key={"actionColumn"}
             render={(text, path: TablePath) => (
                 <>
                   {path.value ? (
                       <Tooltip placement="top" title="Remove">
-                        <Icon
+                        <StyledIcon
+                            fontSize={16}
                             type="close"
-                            style={{fontSize: 16, cursor: "pointer", marginTop: 5}}
                             onClick={() => removePath(path.value, importPaths, onImportsChange)}
                         />
                       </Tooltip>
                   ) : (
                       <Tooltip placement="top" title="Add">
-                        <Icon
-                            style={{color: '#28d440', fontSize: 18, cursor: "pointer", marginTop: 5}}
+                        <StyledIcon
+                            fontSize={18}
                             type="plus"
                             onClick={() => {
                               const pathAdded = addImportPath(pathValue, importPaths, onImportsChange);

@@ -6,8 +6,10 @@ import { ProtoInfo, ProtoService } from '../../behaviour';
 import { DraggableItem, DraggableTabs } from "./DraggableTabList";
 import * as Mousetrap from 'mousetrap';
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
+import styled from 'styled-components';
 
 interface TabListProps {
+  theme: string
   tabs: TabData[]
   activeKey?: string
   onChange?: (activeKey: string) => void
@@ -25,11 +27,27 @@ export interface TabData {
   initialRequest?: EditorRequest,
 }
 
+const StyledTabPane = styled(Tabs.TabPane)`
+  color: ${props=>props.theme.primary};
+  background: ${props=>props.theme.background};
+`
+
+const StyledTabs = styled(Tabs)`
+  color: ${props=>props.theme.primary} !important;
+  background: ${props=>props.theme.background} !important;
+  padding: 10px 0px 0px 20px;
+  margin-bottom: 0px;
+  height: 100%;
+`
+
+const StyledDraggableTabs = styled(DraggableTabs)`
+
+`
 export interface EditorTabRequest extends EditorRequest {
   id: string
 }
 
-export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEditorRequestChange, environmentList, onEnvironmentChange }: TabListProps) {
+export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEditorRequestChange, environmentList, onEnvironmentChange, theme }: TabListProps) {
   const tabsWithMatchingKey =
     tabs.filter(tab => tab.tabKey === activeKey);
 
@@ -51,7 +69,7 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
   });
 
   return (
-    <Tabs
+    <StyledTabs
       className={"draggable-tabs"}
       onEdit={(targetKey, action) => {
         if (action === "remove") {
@@ -59,19 +77,16 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
         }
       }}
       onChange={onChange}
-      tabBarStyle={styles.tabBarStyle}
-      style={styles.tabList}
       activeKey={tabActiveKey || "0"}
       hideAdd
       type="editable-card"
       renderTabBar={(props, DefaultTabBar: any) => {
         return (
-            <DraggableTabs
+            <StyledDraggableTabs
                 onSortEnd={onDragEnd}
                 lockAxis={"x"}
                 axis={"x"}
                 pressDelay={120}
-                helperClass={"draggable draggable-tab"}
             >
               <DefaultTabBar {...props}>
                 {(node: any) => {
@@ -88,31 +103,31 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
                   )
                 }}
               </DefaultTabBar>
-            </DraggableTabs>
+            </StyledDraggableTabs>
         )
       }}
     >
       {tabs.length === 0 ? (
-        <Tabs.TabPane
+        <StyledTabPane
           tab={"New Tab"}
           key={"0"}
           closable={false}
-          style={{ height: "100%" }}
         >
           <Editor
+            theme={theme}
             active={true}
             environmentList={environmentList}
             onEnvironmentListChange={onEnvironmentChange}
           />
-        </Tabs.TabPane>
+        </StyledTabPane>
       ) : tabs.map((tab) => (
-          <Tabs.TabPane
+          <StyledTabPane
             tab={`${tab.service.serviceName}.${tab.methodName}`}
             key={tab.tabKey}
             closable={true}
-            style={{ height: "100%" }}
           >
             <Editor
+              theme={theme}
               active={tab.tabKey === activeKey}
               environmentList={environmentList}
               protoInfo={new ProtoInfo(tab.service, tab.methodName)}
@@ -126,18 +141,8 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
                 })
               }}
             />
-          </Tabs.TabPane>
+          </StyledTabPane>
       ))}
-    </Tabs>
+    </StyledTabs>
   );
 }
-
-const styles = {
-  tabList: {
-    height: "100%"
-  },
-  tabBarStyle: {
-    padding: "10px 0px 0px 20px",
-    marginBottom: "0px",
-  }
-};

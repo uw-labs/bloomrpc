@@ -1,39 +1,24 @@
 import * as React from 'react';
-
+import styled from 'styled-components'
 
 interface BadgeProps {
   type: "protoFile" | "service" | "method"
   children: Node | string | Element
 }
 
-export function Badge({ type, children }: BadgeProps) {
+const StyledBadge = styled.div<{type: BadgeProps["type"]}>`
+  line-height: 15px;
+  font-size: 11px;
+  margin-top: 5px;
+  margin-right: 7px;
+  padding-bottom: 1px;
+  border-radius: 50%;
+  color: ${props =>  props.theme.badge.color[props.type]};
+  background-color: ${props => props.theme.badge.background[props.type]};
+`
 
+export function Badge({ type, children }: BadgeProps) {
   return (
-    <div style={{
-      ...styles.badge,
-      ...styles[type]
-    }}>{children}</div>
+    <StyledBadge type={type}>{children}</StyledBadge>
   )
 }
-
-const styles: {[key: string]: any} = {
-  badge: {
-    lineHeight: "15px",
-    fontSize: "11px",
-    marginTop: "5px",
-    marginRight: "7px",
-    paddingBottom: "1px",
-  },
-  protoFile: {
-    backgroundColor: "#15abff",
-    color: "#fff"
-  },
-  service: {
-    backgroundColor: "#ffa733",
-    color: "#fff",
-  },
-  method: {
-    backgroundColor: "#2cc316",
-    color: "#fff",
-  },
-};

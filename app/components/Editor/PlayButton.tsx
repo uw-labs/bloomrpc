@@ -8,10 +8,13 @@ import {
   setResponse,
   setResponseStreamData,
   setRequestStreamData,
-  addResponseStreamData, setStreamCommitted
+  addResponseStreamData,
+  setStreamCommitted
 } from './actions';
 import { ControlsStateProps } from './Controls';
 import { GRPCEventType, GRPCRequest, ResponseMetaInformation, GRPCEventEmitter, GRPCWebRequest } from '../../behaviour';
+
+import styled from 'styled-components'
 
 export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) => {
   // Do nothing if not set
@@ -109,6 +112,19 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   }
 };
 
+
+const StyledIcon = styled(Icon)`
+  font-size: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: ${props=>props.theme.primary};
+  background: ${props=>props.theme.background};  
+  :hover {
+    background: ${props=>props.theme.backgroundFeedback};
+  }
+  border: 3px solid rgb(238, 238, 238);
+`
+
 export function PlayButton({ dispatch, state, protoInfo, active }: ControlsStateProps) {
   React.useEffect(() => {
     if (!active) {
@@ -131,21 +147,9 @@ export function PlayButton({ dispatch, state, protoInfo, active }: ControlsState
   ])
 
   return (
-    <Icon
+    <StyledIcon
       type={state.loading ? "pause-circle" : "play-circle"}
-      theme="filled" style={{ ...styles.playIcon, ...(state.loading ? { color: "#ea5d5d" } : {}) }}
       onClick={() => makeRequest({ dispatch, state, protoInfo })}
     />
   )
 }
-
-const styles = {
-  playIcon: {
-    fontSize: 50,
-    color: "#28d440",
-    border: "3px solid rgb(238, 238, 238)",
-    borderRadius: "50%",
-    cursor: "pointer",
-    background: "#fff",
-  },
-};

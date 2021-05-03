@@ -2,10 +2,11 @@ import * as React from 'react';
 import { Button, Icon, Tooltip, Switch, Modal, Menu, Dropdown } from 'antd';
 import { setInteractive, setProtoVisibility, setGrpcWeb } from './actions';
 import { EditorAction } from './Editor';
+import { Theme } from '../../App'
 import {useState} from "react";
 import {TLSManager} from "./TLSManager";
 import { ProtoInfo, Certificate } from '../../behaviour';
-
+import styled from 'styled-components'
 interface OptionsProps {
   protoInfo: ProtoInfo
   dispatch: React.Dispatch<EditorAction>
@@ -17,6 +18,49 @@ interface OptionsProps {
   onClickExport?: () => void
 }
 
+const StyledModalTitle = styled.div`
+  color: ${props=>props.theme.primary} !important;
+  background: ${props=>props.theme.background} !important;
+`
+
+const StyledModal = styled(Modal)`
+  color: ${props=>props.theme.primary} !important;
+`
+
+const ViewProtoBtn = styled(Button)`
+  color: ${props=>props.theme.primary} !important;
+  background: ${props=>props.theme.backgroundDark} !important;
+  transition: none;
+  &:hover {
+    background: ${props=>props.theme.backgroundLight} !important;
+  }
+`
+
+const StyledSwitch = styled(Switch)`
+  color: ${props=>props.theme.switch.color} !important;
+  background: ${props=>props.theme.switch.background} !important;
+  transition: none;
+`
+
+const TLSButton = styled.span`
+  cursor: pointer;
+  margin-left: 10px;
+  padding: 1px 10px;
+  border-radius: 3px;
+  font-weight: 500;
+  font-size: 13px;
+  border: 1px solid ${props=>props.theme.border.all};
+`
+
+type Props = {
+  theme: Theme,
+  tlsSelected: boolean
+}
+
+const LockIcon = styled(Icon)`
+  font-size: 18px;
+  color: ${(props: Props) => props.tlsSelected ? props.theme.icon.success : props.theme.icon.warning}
+`
 export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecked, onInteractiveChange, tlsSelected, onTLSSelected, onClickExport }: OptionsProps) {
 
   const [tlsModalVisible, setTlsModalVisible] = useState(false);
@@ -30,28 +74,27 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
             alignItems: "center",
           }}>
             <Tooltip placement="bottom" title={tlsSelected ? "Secure Connection" : "Unsecure Connection"}>
-              <Icon
+              <LockIcon
+                  tlsSelected={!!tlsSelected}
                   type={tlsSelected ? "lock" : "unlock"}
                   style={{
                     fontSize: 18,
-                    color: tlsSelected ? "#28d440" : "#bdbcbc",
                   }}
               />
             </Tooltip>
-            <span
+            <TLSButton
               onClick={() => setTlsModalVisible(true)}
-              style={styles.tlsButton}
             >
-              <span style={{}}>TLS</span>
-            </span>
+              <span>TLS</span>
+            </TLSButton>
           </div>
 
-          <Modal
+          <StyledModal
               title={(
-                  <div>
+                  <StyledModalTitle>
                     <Icon type="lock" />
                     <span style={{marginLeft: 10}}> TLS / SSL Manager </span>
-                  </div>
+                  </StyledModalTitle>
               )}
               visible={tlsModalVisible}
               onCancel={() => setTlsModalVisible(false)}
@@ -65,7 +108,7 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
                 selected={tlsSelected}
                 onSelected={onTLSSelected}
             />
-          </Modal>
+          </StyledModal>
       </div>
 
       <div style={{ ...styles.inline }}>
@@ -84,7 +127,7 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
           </div>
         </Dropdown>
         <div style={{paddingRight: 10}}>
-          <Switch
+          <StyledSwitch
             checkedChildren="WEB &nbsp;"
             defaultChecked={grpcWebChecked}
             unCheckedChildren="GRPC"
@@ -94,7 +137,7 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
           />
         </div>
         <div style={{paddingRight: 10}}>
-          <Switch
+          <StyledSwitch
             checkedChildren="Interactive"
             defaultChecked={interactiveChecked}
             unCheckedChildren="Manual &nbsp; &nbsp; &nbsp;"
@@ -105,13 +148,13 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
           />
         </div>
 
-        <Button
+        <ViewProtoBtn
           icon="file-ppt"
           type="dashed"
           onClick={() => dispatch(setProtoVisibility(true))}
         >
           View Proto
-        </Button>
+        </ViewProtoBtn>
       </div>
     </div>
   )
@@ -125,15 +168,5 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  tlsButton: {
-    marginLeft: 10,
-    cursor: "pointer",
-    background: "#fafafa",
-    padding: "1px 10px",
-    borderRadius: "3px",
-    fontWeight: 500,
-    fontSize: "13px",
-    border: "1px solid #d8d8d8",
   }
 };

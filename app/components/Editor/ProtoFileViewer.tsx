@@ -2,18 +2,27 @@ import * as React from 'react';
 import AceEditor from 'react-ace';
 import { Drawer } from 'antd';
 import { ProtoInfo } from '../../behaviour';
-
+import styled from 'styled-components'
 
 interface ProtoFileViewerProps {
+  theme: string
   protoInfo: ProtoInfo
   visible: boolean
   onClose: () => void
 }
 
-export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewerProps) {
+const StyledAceEditor = styled(AceEditor)`
+  background: ${props => props.theme.backgroundLight} !important;
+  margin-top: 10px;
+`
+
+const StyledDrawer = styled(Drawer)``
+
+
+export function ProtoFileViewer({ protoInfo, visible, onClose, theme }: ProtoFileViewerProps) {
 
   return (
-    <Drawer
+    <StyledDrawer
       title={protoInfo.service.proto.fileName.split('/').pop()}
       placement={"right"}
       width={"50%"}
@@ -21,13 +30,12 @@ export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewer
       onClose={onClose}
       visible={visible}
     >
-      <AceEditor
-        style={{ marginTop: "10px", background: "#fff" }}
+      <StyledAceEditor
         width={"100%"}
         height={"calc(100vh - 115px)"}
         mode="protobuf"
-        theme="textmate"
         name="output"
+        theme={theme === 'white' ? "textmate" : "monokai"}
         fontSize={13}
         showPrintMargin={false}
         wrapEnabled
@@ -49,6 +57,6 @@ export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewer
           tabSize: 1,
         }}
       />
-    </Drawer>
+    </StyledDrawer>
   );
 }

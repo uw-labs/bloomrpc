@@ -4,6 +4,7 @@ import { RequestType } from "./RequestType";
 import { ChangeEvent, useEffect, useState } from "react";
 import { ProtoInfo } from "../../behaviour";
 import { EditorEnvironment } from "./Editor";
+import styled from 'styled-components';
 
 export interface AddressBarProps {
   loading: boolean
@@ -16,6 +17,47 @@ export interface AddressBarProps {
   onEnvironmentSave?: (name: string) => void
   onEnvironmentDelete?: (name: string) => void
 }
+
+
+const StyledSelect = styled(Select)`
+  width: 20%;
+  color: ${props=>props.theme.primary};
+  background: ${props=>props.theme.backgroundLight};
+
+`
+
+const StyledInput = styled(Input)`
+  width: 80%;
+  font-weight: 600;
+  color: ${props=>props.theme.primary};
+  background: ${props=>props.theme.background};
+
+`
+
+const InputAddon = styled.div`
+  display: flex;
+  align-items: center;
+  width: 140px;
+  border: 1px solid ${props=>props.theme.border.all};
+  border-left: 0;
+  color: ${props=>props.theme.primary};
+  background: ${props=>props.theme.backgroundLight};
+`
+
+const InputIcon = styled(Icon)`
+  padding-left: 10px;
+  padding-right: 10px;
+`
+const StyledSelectOption = styled(Select.Option)``
+const StyledInputGroup = styled(Input.Group)`
+`
+const StyledDropdown = styled.div`
+  color: ${props=> {
+    return props.theme.input.color
+  }};
+  background: ${props=>props.theme.input.background};
+  
+`
 
 export function AddressBar({loading, url, onChangeUrl, protoInfo, defaultEnvironment, environments, onEnvironmentSave, onChangeEnvironment, onEnvironmentDelete}: AddressBarProps) {
   const [currentEnvironmentName, setCurrentEnvironmentName] = useState<string>(defaultEnvironment || "");
@@ -50,19 +92,22 @@ export function AddressBar({loading, url, onChangeUrl, protoInfo, defaultEnviron
 
   return (
       <>
-        <Input.Group compact>
-          <Select
+        <StyledInputGroup compact>
+          <StyledSelect
               defaultValue={currentEnvironmentName}
               value={currentEnvironmentName || undefined}
               placeholder={"Env"}
-              style={{width: "20%"}}
               dropdownStyle={{ minWidth: 200 }}
+              dropdownRender={menu => (
+                <StyledDropdown>
+                  {menu}
+                </StyledDropdown>
+              )}
               onSelect={(value: string) => {
                 // Save brand new environment
                 if (value === "new") {
                   Modal.confirm({
                     title: 'Environment Name',
-                    className: "env-modal",
                     icon: (
                         <Icon type="project" />
                     ),
@@ -84,7 +129,6 @@ export function AddressBar({loading, url, onChangeUrl, protoInfo, defaultEnviron
                 if (value === "update") {
                   Modal.confirm({
                     title: `Update ${currentEnvironmentName}?`,
-                    className: "env-modal",
                     icon: (
                         <Icon type="project" />
                     ),
@@ -101,7 +145,6 @@ export function AddressBar({loading, url, onChangeUrl, protoInfo, defaultEnviron
                 if (value === "delete") {
                   Modal.confirm({
                     title: `Deleting ${currentEnvironmentName}?`,
-                    className: "env-modal",
                     icon: (
                         <Icon type="delete" />
                     ),
@@ -121,40 +164,38 @@ export function AddressBar({loading, url, onChangeUrl, protoInfo, defaultEnviron
                 onChangeEnvironment && onChangeEnvironment(selectedEnv);
               }}
           >
-            <Select.Option value="">
+            <StyledSelectOption value="">
               None
-            </Select.Option>
+            </StyledSelectOption>
 
             {environments && environments.map(environment => (
-              <Select.Option key={environment.name} value={environment.name}>{environment.name}</Select.Option>
+              <StyledSelectOption key={environment.name} value={environment.name}>{environment.name}</StyledSelectOption>
             ))}
 
             {currentEnvironmentName &&
-              <Select.Option value="update">
+              <StyledSelectOption value="update">
                   <Icon type="edit" /> Update Environment
-              </Select.Option>
+              </StyledSelectOption>
             }
             {currentEnvironmentName &&
-            <Select.Option value="delete">
+            <StyledSelectOption value="delete">
                 <Icon type="delete" /> Delete Environment
-            </Select.Option>
+            </StyledSelectOption>
             }
-            <Select.Option value="new">
+            <StyledSelectOption value="new">
               <Icon type="plus-circle" /> Save New Environment
-            </Select.Option>
-          </Select>
-          <Input
-              style={{width: "80%"}}
-              className="server-url"
+            </StyledSelectOption>
+          </StyledSelect>
+          <StyledInput
               addonAfter={(
-                  <div style={{display: "flex", alignItems: "center", width: "125px"}}>
-                    {loading ? <Icon type="loading"/> : <Icon type="database"/>}
+                  <InputAddon>
+                    {loading ? <InputIcon type="loading"/> : <InputIcon type="database"/>}
                     <RequestType protoInfo={protoInfo} />
-                  </div>
+                  </InputAddon>
               )}
               value={url}
               onChange={onChangeUrl}/>
-        </Input.Group>
+        </StyledInputGroup>
       </>
   )
 }

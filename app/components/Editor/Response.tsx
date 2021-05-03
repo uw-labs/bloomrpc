@@ -4,11 +4,12 @@ import { Viewer } from './Viewer';
 import { EditorResponse } from "./Editor";
 
 interface ResponseProps {
+  theme: string
   streamResponse: EditorResponse[]
   response: EditorResponse
 }
 
-export function Response({response, streamResponse}: ResponseProps) {
+export function Response({response, streamResponse, theme}: ResponseProps) {
   const defaultKey = `responseTab`;
   return (
     <>
@@ -20,6 +21,7 @@ export function Response({response, streamResponse}: ResponseProps) {
         {streamResponse.length === 0 && (
           <Tabs.TabPane tab={"Response"} key={"unaryResponse"}>
               <Viewer
+                  theme={theme}
                   output={response.output}
                   responseTime={response.responseTime}
                   emptyContent={(
@@ -36,6 +38,7 @@ export function Response({response, streamResponse}: ResponseProps) {
         {streamResponse.map((data, key) => (
           <Tabs.TabPane tab={`Stream ${key + 1}`} key={`response-${key}`}>
             <Viewer
+                theme={theme}
                 output={data.output}
                 responseTime={data.responseTime}
             />

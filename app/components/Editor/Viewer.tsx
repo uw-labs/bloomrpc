@@ -4,15 +4,32 @@ import AceEditor from 'react-ace';
 import * as Mousetrap from 'mousetrap';
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 import { Input } from 'antd';
+import styled from 'styled-components'
 
 interface ResponseProps {
+  theme: string
   output: string,
   responseTime?: number
   emptyContent?: Node | Element | JSX.Element
 }
 
-export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
 
+const StyledAceEditor = styled(AceEditor)`
+  background: ${props => props.theme.backgroundLight} !important;
+`
+
+const StyledResponseTime = styled.div`
+  user-select: none;
+  font-size: 11px;
+  padding: 3px 7px;
+  position: absolute;
+  top: 5px;
+  right: 0px;
+  z-index: 30;
+  color: ${props=>props.theme.primary};
+`
+
+export function Viewer({ output, responseTime, emptyContent, theme }: ResponseProps) {
   const editorRef: any = useRef(null);
   const inputSearch: any = useRef(null);
   const [showFind, setShowFind] = useState(false);
@@ -50,21 +67,20 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
       {!output && emptyContent}
 
       { responseTime && (
-          <div style={styles.responseTime}>
+          <StyledResponseTime>
             {responseTime.toFixed(3)}s
-          </div>
+          </StyledResponseTime>
       )}
 
       {output && (
-        <AceEditor
+        <StyledAceEditor
           ref={editorRef}
           className={"response-edit"}
-          style={{ background: "#fff" }}
           width={"100%"}
           height={"calc(100vh - 188px)"}
           mode="json"
-          theme="textmate"
           name="output"
+          theme={theme === 'white' ? "textmate" : "monokai"}
           fontSize={13}
           showPrintMargin={false}
           wrapEnabled
@@ -100,14 +116,12 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
 
 const styles = {
   responseContainer: {
-    background: "white",
     position: "relative" as "relative",
   },
   responseTime: {
     userSelect: "none" as "none",
     fontSize: 11,
     padding: "3px 7px",
-    background: '#f3f6f7',
     position: "absolute" as "absolute",
     top: "5px",
     right: "0px",

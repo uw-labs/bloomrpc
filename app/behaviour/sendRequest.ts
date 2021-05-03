@@ -5,6 +5,7 @@ import * as grpc from 'grpc';
 import * as fs from "fs";
 import { Certificate } from "./importCertificates";
 import * as grpcWeb from 'grpc-web'
+import { Utf8AsciiBinaryEncoding } from "crypto";
 
 export interface GRPCEventEmitter extends EventEmitter {
   protoInfo: ProtoInfo;
@@ -70,9 +71,9 @@ export class GRPCRequest extends EventEmitter {
 
     // Add metadata
     const md = new Metadata();
-    Object.keys(metadata).forEach(key => {
+    Object.keys(metadata).forEach((key: string) => {
       if (key.endsWith("-bin")) {
-        let encoding = "utf8";
+        let encoding: Utf8AsciiBinaryEncoding = "utf8";
         let value = metadata[key];
 
         // can prefix the value with any encoding that the buffer supports
@@ -85,7 +86,7 @@ export class GRPCRequest extends EventEmitter {
           const groups = new RegExp(regexEncoding).exec(value);
 
           if (groups) {
-            encoding = groups[1];
+            encoding = groups[1] as Utf8AsciiBinaryEncoding;
             value = groups[2];
           }
         }

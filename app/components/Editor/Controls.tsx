@@ -4,7 +4,7 @@ import { PlayButton } from './PlayButton';
 import { Icon, Tooltip } from 'antd';
 import { setRequestStreamData, setStreamCommitted } from './actions';
 import { ProtoInfo } from '../../behaviour';
-
+import styled from 'styled-components'
 export interface ControlsStateProps {
   dispatch: React.Dispatch<EditorAction>
   state: EditorState
@@ -12,9 +12,33 @@ export interface ControlsStateProps {
   active?: boolean
 }
 
+
+
+const Commit = styled.div`
+  color: ${props=>props.theme.tooltip.primary};
+  padding: 10px;
+  border-radius: 0 50% 50% 0;
+  font-size: 18px;
+  cursor: pointer;
+  border-left: none;
+`
+
+const PushData = styled.div`
+  color: ${props=>props.theme.primary};
+  padding: 10px;
+  border-radius: 0 50% 50% 0;
+  font-size: 18px;
+  cursor: pointer;
+  border-left: none;
+`
+
+const ControlsContainer = styled.div`
+  display: flex;
+`
+
 export function Controls({ dispatch, state, protoInfo, active }: ControlsStateProps) {
   return (
-    <div>
+    <>
       <PlayButton
         active={active}
         dispatch={dispatch}
@@ -24,9 +48,9 @@ export function Controls({ dispatch, state, protoInfo, active }: ControlsStatePr
 
       { isControlVisible(state) &&
         (
-          <div style={styles.controlsContainer}>
+          <ControlsContainer>
             <Tooltip placement="topLeft" title={"Push Data"}>
-              <div style={styles.pushData} onClick={() => {
+              <PushData onClick={() => {
                 if (state.call) {
                   dispatch(setRequestStreamData([
                     ...state.requestStreamData,
@@ -36,12 +60,11 @@ export function Controls({ dispatch, state, protoInfo, active }: ControlsStatePr
                 }
               }}>
                 <Icon type="double-right"/>
-              </div>
+              </PushData>
             </Tooltip>
 
             <Tooltip placement="topRight" title={"Commit Stream"}>
-              <div
-                style={styles.commit}
+              <Commit
                 onClick={() => {
                   if (state.call) {
                     state.call.commitStream();
@@ -49,11 +72,11 @@ export function Controls({ dispatch, state, protoInfo, active }: ControlsStatePr
                   }
                 }}>
                 <Icon type="check"/>
-              </div>
+              </Commit>
             </Tooltip>
-          </div>
+          </ControlsContainer>
         )}
-      </div>
+      </>
   );
 }
 
@@ -63,33 +86,3 @@ export function isControlVisible(state: EditorState) {
       (state.call && state.call.protoInfo.isClientStreaming()) &&
       !state.streamCommitted);
 }
-
-const styles = {
-  controlsContainer: {
-    display: "flex",
-    marginLeft: "-15px",
-    marginTop: 17
-  },
-  pushData: {
-    background: "#11c9f3",
-    color: "white",
-    padding: "10px",
-    paddingLeft: "12px",
-    borderRadius: "50% 0 0 50%",
-    fontSize: "18px",
-    cursor: "pointer",
-    border: "2px solid rgb(238, 238, 238)",
-    borderRight: "none"
-  },
-  commit: {
-    background: "#28d440",
-    color: "white",
-    padding: "10px",
-    paddingLeft: "12px",
-    borderRadius: "0 50% 50% 0",
-    fontSize: "18px",
-    cursor: "pointer",
-    border: "2px solid rgb(238, 238, 238)",
-    borderLeft: "none",
-  }
-};

@@ -18,6 +18,7 @@ import {
 } from '../storage';
 import { EditorEnvironment } from "./Editor";
 import { getEnvironments } from "../storage/environments";
+import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid';
 
 export interface EditorTabs {
@@ -25,7 +26,23 @@ export interface EditorTabs {
   tabs: TabData[]
 }
 
-export function BloomRPC() {
+
+const StyledLayout = styled(Layout)`
+  height: 100vh;
+  background: ${props => props.theme.background};
+`
+
+const StyledLayoutSider = styled(Layout.Sider)`
+  background: ${props => props.theme.background};
+  transition: all 0s;
+`
+
+interface IBloomRPC {
+  theme: string
+  changeTheme: () => void
+}
+
+export function BloomRPC({ theme, changeTheme }: IBloomRPC) {
 
   const [protos, setProtosState] = useState<ProtoFile[]>([]);
   const [editorTabs, setEditorTabs] = useState<EditorTabs>({
@@ -51,10 +68,12 @@ export function BloomRPC() {
   }, []);
 
   return (
-    <Layout style={styles.layout}>
-      <Layout>
-        <Layout.Sider style={styles.sider} width={ 300 }>
+    <Layout>
+      <StyledLayout>
+        <StyledLayoutSider width={300}>
           <Sidebar
+            changeTheme={changeTheme}
+            theme={theme}
             protos={protos}
             onProtoUpload={handleProtoUpload(setProtos, protos)}
             onReload={() => {
@@ -66,10 +85,11 @@ export function BloomRPC() {
             }}
             onMethodDoubleClick={handleMethodDoubleClick(editorTabs, setTabs)}
           />
-        </Layout.Sider>
+        </StyledLayoutSider>
 
         <Layout.Content>
           <TabList
+            theme={theme}
             tabs={editorTabs.tabs || []}
             onDragEnd={({oldIndex, newIndex}) => {
               const newTab = editorTabs.tabs[oldIndex];
@@ -126,7 +146,7 @@ export function BloomRPC() {
             }}
           />
         </Layout.Content>
-      </Layout>
+      </StyledLayout>
 
     </Layout>
   );
@@ -285,22 +305,3 @@ function handleMethodDoubleClick(editorTabs: EditorTabs, setTabs: React.Dispatch
   }
 
 }
-
-const styles = {
-  layout: {
-    height: "100vh"
-  },
-  header: {
-    color: "#fff",
-    fontWeight: 900,
-    fontSize: 20,
-    display: "flex",
-    justifyContent: "space-between",
-  },
-  sider: {
-    zIndex: 20,
-    borderRight: "1px solid rgba(0, 21, 41, 0.18)",
-    backgroundColor: "white",
-    boxShadow: "3px 0px 4px 0px rgba(0,0,0,0.10)",
-  },
-};

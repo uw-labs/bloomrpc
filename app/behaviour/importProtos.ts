@@ -52,7 +52,6 @@ export async function loadProtos(filePaths: string[], importPaths?: string[], on
 
       // Services with methods
       const services = parseServices(proto);
-
       // Proto file
       list.push({
         proto,

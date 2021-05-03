@@ -1,9 +1,24 @@
 import * as React from 'react';
 import { ProtoInfo } from '../../behaviour';
+import styled from 'styled-components'
 
 interface RequestTypeProps {
   protoInfo?: ProtoInfo
 }
+
+const StyledRequestType = styled.div`
+  text-overflow: ellipsis;
+  max-width: 125px;
+  overflow: hidden;
+  border-left: 1px solid ${props=>props.theme.border.left};
+  white-space: nowrap;
+  width: 100%;
+  color: ${props=>props.theme.primary};
+  background: ${props=>props.theme.backgroundDark};
+  padding: 7px 8px;
+  font-size: 11px;
+  font-weight: 500;
+`
 
 export function RequestType({ protoInfo }: RequestTypeProps) {
   let reqType = "Unary Call";
@@ -19,25 +34,8 @@ export function RequestType({ protoInfo }: RequestTypeProps) {
   }
 
   return (
-    <div style={{...styles.reqType, ...styles.badge}}>
+    <StyledRequestType>
       {reqType}
-    </div>
+    </StyledRequestType>
   );
 }
-
-const styles = {
-  reqType: {
-    textOverflow: "ellipsis",
-    maxWidth: "125px",
-    overflow: "hidden",
-    whiteSpace: "nowrap" as "nowrap",
-    width: "100%",
-  },
-  badge: {
-    backgroundColor: "#001529",
-    padding: "7px 8px",
-    fontSize: "11px",
-    color: "#fff",
-    fontWeight: 500,
-  }
-};

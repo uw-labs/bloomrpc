@@ -4,19 +4,47 @@ import AceEditor from 'react-ace';
 import Resizable from 're-resizable';
 import { storeMetadata } from "../../storage";
 import { useState } from "react";
-
+import styled from 'styled-components';
 interface MetadataProps {
+  theme: string
   onClickMetadata: () => void,
   onMetadataChange: (value: string) => void,
   value: string,
 }
 
-export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataProps) {
+const StyledMetadata = styled.div`
+  color: ${props=>props.theme.primary};
+  background: ${props=>props.theme.background};
+  border-top: 1px solid ${props=>props.theme.border.top};
+`
+
+const StyledMetadataOption = styled.div`
+  padding: 7px 10px;
+  margin-bottom: 5px;
+`
+
+const OptionContainer = styled(Resizable)<{height: number}>`
+  position: absolute !important;
+  font-weight: 900;
+  font-size: 13px;
+  border-left: 1px solid ${props=>props.theme.border.left};
+  z-index: 10;
+  bottom: -38px;
+  height: ${props => {
+    return props.height;
+  }}px !important;
+`
+
+const StyledAceEditor = styled(AceEditor)`
+  background: ${props => props.theme.backgroundLight} !important;
+`
+
+export function Metadata({ onClickMetadata, onMetadataChange, value, theme }: MetadataProps) {
   const [height, setHeight] = useState(38);
   const visibile = height > 38;
-
   return (
-    <Resizable
+    <OptionContainer
+        height={height}
         size={{width: "100%", height: height}}
         maxHeight={500}
         minHeight={38}
@@ -24,14 +52,9 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
         onResizeStop={(e, direction, ref, d) => {
           setHeight(height + d.height);
         }}
-        className="meatada-panel"
-         style={{
-           ...styles.optionContainer,
-           ...{bottom: `-38px`, height: `${height}px`},
-         }}
     >
-      <div>
-        <div style={styles.optionLabel}>
+      <StyledMetadata>
+        <StyledMetadataOption>
           <a
             href={"#"}
             style={styles.optionLink}
@@ -44,16 +67,15 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
               onClickMetadata()
             }}
           > {visibile ? <Icon type="down"/> : <Icon type="up"/>} METADATA </a>
-        </div>
+        </StyledMetadataOption>
 
         <div>
-          <AceEditor
+          <StyledAceEditor
             width={"100%"}
-            style={{ background: "#f5f5f5" }}
             height={`${height + 20}px`}
             mode="json"
             focus={visibile}
-            theme="textmate"
+            theme={theme === 'white' ? "textmate" : "monokai"}
             fontSize={13}
             name="metadata"
             onChange={(value) => {
@@ -69,27 +91,17 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
             }}
           />
         </div>
-      </div>
-    </Resizable>
+      </StyledMetadata>
+    </OptionContainer>
   )
 }
 
 const styles = {
   optionLabel: {
-    background: "#001529",
     padding: "7px 10px",
     marginBottom: "5px"
   },
-  optionContainer: {
-    position: "absolute" as "absolute",
-    fontWeight: 900,
-    fontSize: "13px",
-    borderLeft: "1px solid rgba(0, 21, 41, 0.18)",
-    background: "#f5f5f5",
-    zIndex: 10,
-  },
   optionLink: {
-    color: "#fff",
     textDecoration: "none",
   },
 };

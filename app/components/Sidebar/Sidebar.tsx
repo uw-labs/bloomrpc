@@ -16,12 +16,14 @@ interface SidebarProps {
 }
 
 export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, onReload, onMethodDoubleClick }: SidebarProps) {
-
+  
   const [importPaths, setImportPaths] = useState<string[]>([""]);
   const [importPathVisible, setImportPathsVisible] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [filterMatch, setFilterMatch] = useState<string|null>(null);
-
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [autoExpandParent, setAutoExpandParent] = useState(true);
+  
   useEffect(() => {
     setImportPaths(getImportPaths());
   }, []);
@@ -62,6 +64,29 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
     }
   }
 
+
+  const onExpand = (expandedKeys:string[]) => {
+    setExpandedKeys(expandedKeys);
+    // if children are expanded and autoExpandParent is set to true, parent can not collapse
+    setAutoExpandParent(false);
+  };
+
+  const collapseAll = () => {
+    setExpandedKeys([]);
+  };
+
+  const expandAll = () => {
+    var methods = ([] as string[]).concat(
+      ...protos.map((proto) =>([] as string[]).concat(
+        ...(Object.keys(proto.services).map(service => proto.services[service].methodsName
+              .map(method =>`${proto.proto.filePath}||method:${method}||service:${service}`))
+          )
+        )
+      )
+    );
+    setExpandedKeys(methods);  
+  };
+
   return (
     <>
       <div style={styles.sidebarTitleContainer}>
@@ -80,7 +105,7 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
       </div>
 
       <div style={styles.optionsContainer}>
-        <div style={{width: "50%"}}>
+        <div style={{width: "60%"}}>
           <Tooltip title="Reload" placement="bottomLeft" align={{offset: [-8, 0]}}>
             <Button
               type="ghost"
@@ -108,6 +133,26 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
               onClick={() => toggleFilter()}
             >
               <Icon type="filter" style={{cursor: "pointer", color: "#1d93e6"}}/>
+            </Button>
+          </Tooltip>
+
+          <Tooltip title="Expand all" placement="bottomLeft" align={{offset: [-8, 0]}}>
+            <Button
+              type="ghost"
+              style={{height: 24, paddingRight: 5, paddingLeft: 5, marginLeft: 5}}
+              onClick={() => expandAll()}
+            >
+              <Icon type="arrows-alt" style={{cursor: "pointer", color: "#1d93e6"}}/>
+            </Button>
+          </Tooltip>
+          
+          <Tooltip title="Collapse all" placement="bottomLeft" align={{offset: [-8, 0]}}>
+            <Button
+              type="ghost"
+              style={{height: 24, paddingRight: 5, paddingLeft: 5, marginLeft: 5}}
+              onClick={() => collapseAll()}
+            >
+              <Icon type="shrink" style={{cursor: "pointer", color: "#1d93e6"}}/>
             </Button>
           </Tooltip>
 
@@ -157,6 +202,11 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
         {protos.length > 0 && <Tree.DirectoryTree
           showIcon
           defaultExpandAll
+          onExpand={async (protos) => {
+            onExpand(protos);
+          }}
+          expandedKeys={expandedKeys}
+          autoExpandParent={autoExpandParent}
           onSelect={async (selectedKeys) => {
             const selected = selectedKeys.pop();
             const protoDefinitions = processSelectedKey(selected);
